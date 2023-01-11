@@ -94,5 +94,5 @@ workflows:
     jobs:
       # - build-and-push
       # - create-cluster
-      # - trigger-eaas
-      - check-var
+      - trigger-eaas
+      # - check-var
