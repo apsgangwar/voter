@@ -1,0 +1,64 @@
+version: 2.1
+orbs:
+  docker: circleci/docker@2.2.0
+  eaas-orb: roost-eaas-orb/eaas-orb@1.0.1
+jobs:
+  build-and-push:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - docker/build:
+          image: apsgangwar/voter
+          tag: '$CIRCLE_SHA1,latest'
+          path: ./voter/
+          docker-context: ./voter
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: apsgangwar/voter
+          tag: '$CIRCLE_SHA1,latest'
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+      - store_artifacts:
+          path: /tmp/digest.txt
+          destination: /new
+
+  create-cluster:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - eaas-orb/createcluster:
+          alias: 'aps-circle'
+          ami: ubuntu focal 20.04
+          auth_token: ROOST_AUTH_TOKEN
+          cluster_expires_in_hours: '1'
+          disk_size: '50'
+          email: apoorvasingh@zb.io
+          ent_server: ROOST_SERVER
+          instance_type: t3.large
+          k8s_version: 1.22.2
+          namespace: roost-circle
+          num_workers: '1'
+          preemptible: 'false'
+          region: us-west-1
+
+  trigger-eaas:
+    docker:
+      - image: 'cimg/base:stable'
+    steps:
+      - checkout
+      - eaas-orb/triggereaas:
+          application_name: aps-github
+          auth_token: ROOST_AUTH_TOKEN
+          ent_server: ROOST_SERVER
+          pipeline_project_type: github
+
+workflows:
+  ecs-testing:
+    jobs:
+      - build-and-push
+      # - create-cluster
+      - trigger-eaas
