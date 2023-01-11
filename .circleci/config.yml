@@ -52,7 +52,7 @@ jobs:
       - checkout
       - run:
           command: |
-            echo '{
+            echo "{
               \"app_user_id\": \"$ROOST_AUTH_TOKEN\",
               \"application_name\": \"$APPLICATION_NAME\",
               \"git_type\": \"$PIPELINE_PROJECT_TYPE\",
@@ -61,19 +61,19 @@ jobs:
               \"branch\": \"$CIRCLE_BRANCH\",
               \"circle_workflow_id\": \"$CIRCLE_WORKFLOW_ID\",
               \"user_name\": \"$CIRCLE_PROJECT_USERNAME\"
-            }'
+            }"
       - run:
           command: |
-            echo '{
-              \"app_user_id\": \"$ROOST_AUTH_TOKEN\",
-              \"application_name\": \"$APPLICATION_NAME\",
+            echo "{
+              ${ROOST_AUTH_TOKEN} ,
+              ${APPLICATION_NAME} ,
               \"git_type\": \"$PIPELINE_PROJECT_TYPE\",
               \"repo_id\": \"\",
               \"full_repo_name\": \"$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME\",
               \"branch\": \"$CIRCLE_BRANCH\",
               \"circle_workflow_id\": \"$CIRCLE_WORKFLOW_ID\",
               \"user_name\": \"$CIRCLE_PROJECT_USERNAME\"
-            }' > /tmp/aps.txt
+            }" > /tmp/aps.txt
       - store_artifacts:
           path: /tmp/aps.txt
           destination: /tmp/aps.txt
